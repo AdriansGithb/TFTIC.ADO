@@ -109,26 +109,57 @@ namespace ConnexionDB
             #endregion
 
             #region Exe Insertion/modif/suppression des donnees
-            //classe Student ajoutée
-            Student newStudent = new Student() { FirstName = "Adrian", LastName = "Vanhoeke", SectionId = 1010, BirthDate = new DateTime(1985,10,21), YearResult = 14 };
-            using(SqlConnection myConnection = new SqlConnection())
+            ////classe Student ajoutée
+            //Student newStudent = new Student() { FirstName = "Adrian", LastName = "Vanhoeke", SectionId = 1010, BirthDate = new DateTime(1985,10,21), YearResult = 14 };
+            //using(SqlConnection myConnection = new SqlConnection())
+            //{
+            //    myConnection.ConnectionString = MyConnectionString;
+            //    using (SqlCommand cmd = myConnection.CreateCommand())
+            //    {
+            //        cmd.CommandText = "insert into Student (FirstName, LastName,BirthDate,  SectionId, YearResult) output inserted.ID values (" +
+            //            $"'{ newStudent.FirstName} '," +
+            //            $"'{newStudent.LastName}'," +
+            //            $"'{newStudent.BirthDate.ToString("s")}'," + // le "s" est pour le format de la date vu que sqlServer attend le format yyyy-mm-dd
+            //            $"{newStudent.SectionId}," +
+            //            $"{newStudent.YearResult});";
+            //        myConnection.Open();
+            //        newStudent.Id = (int)cmd.ExecuteScalar();
+            //        myConnection.Close();
+            //        Console.WriteLine($"L'id de {newStudent.FirstName} {newStudent.LastName} est {newStudent.Id}");
+            //    }
+            //}
+
+
+            #endregion
+
+            #region Exe Requetes parametrees
+            Student newStudent = new Student() { FirstName = "Steve", LastName = "Lorent", SectionId = 1010, BirthDate = new DateTime(1983, 06, 28), YearResult = 16 };
+            using (SqlConnection myConnection = new SqlConnection())
             {
                 myConnection.ConnectionString = MyConnectionString;
                 using (SqlCommand cmd = myConnection.CreateCommand())
                 {
-                    cmd.CommandText = "insert into Student (FirstName, LastName,BirthDate,  SectionId, YearResult) output inserted.ID values (" +
-                        $"'{ newStudent.FirstName} '," +
-                        $"'{newStudent.LastName}'," +
-                        $"'{newStudent.BirthDate.ToString("s")}'," + // le "s" est pour le format de la date vu que sqlServer attend le format yyyy-mm-dd
-                        $"{newStudent.SectionId}," +
-                        $"{newStudent.YearResult});";
+                    cmd.CommandText = "INSERT INTO Student (FirstName, LastName,BirthDate,  SectionId, YearResult) OUTPUT inserted.ID VALUES (@FirstName, @LastName, @BirthDate, @SectionId, @YearResult); ";
+                    cmd.Parameters.AddWithValue("FirstName", newStudent.FirstName);
+                    cmd.Parameters.AddWithValue("LastName", newStudent.LastName);
+                    cmd.Parameters.AddWithValue("BirthDate", newStudent.BirthDate);
+                    cmd.Parameters.AddWithValue("SectionId", newStudent.SectionId);
+                    cmd.Parameters.AddWithValue("YearResult", newStudent.YearResult);
+                    //ou en créant des SqlParameters
+                    //SqlParameter Pfn = new SqlParameter
+                    //{
+                    //    ParameterName = "FirstName",
+                    //    Value = newStudent.FirstName
+                    //};
+                    //cmd.Parameters.Add(Pfn);
+
                     myConnection.Open();
-                    newStudent.Id = (int)cmd.ExecuteScalar();
+                    object o = cmd.ExecuteScalar();
                     myConnection.Close();
+                    newStudent.Id = (o is DBNull) ? -1 : (int)o;
                     Console.WriteLine($"L'id de {newStudent.FirstName} {newStudent.LastName} est {newStudent.Id}");
                 }
             }
-
 
             #endregion
 
