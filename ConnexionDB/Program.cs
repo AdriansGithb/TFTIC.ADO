@@ -133,37 +133,83 @@ namespace ConnexionDB
             #endregion
 
             #region Exe Requetes parametrees
-            Student newStudent = new Student() { FirstName = "Steve", LastName = "Lorent", SectionId = 1010, BirthDate = new DateTime(1983, 06, 28), YearResult = 16 };
-            using (SqlConnection myConnection = new SqlConnection())
+            //Student newStudent = new Student() { FirstName = "Steve", LastName = "Lorent", SectionId = 1010, BirthDate = new DateTime(1983, 06, 28), YearResult = 16 };
+            //using (SqlConnection myConnection = new SqlConnection())
+            //{
+            //    myConnection.ConnectionString = MyConnectionString;
+            //    using (SqlCommand cmd = myConnection.CreateCommand())
+            //    {
+            //        cmd.CommandText = "INSERT INTO Student (FirstName, LastName,BirthDate,  SectionId, YearResult) OUTPUT inserted.ID VALUES (@FirstName, @LastName, @BirthDate, @SectionId, @YearResult); ";
+            //        cmd.Parameters.AddWithValue("FirstName", newStudent.FirstName);
+            //        cmd.Parameters.AddWithValue("LastName", newStudent.LastName);
+            //        cmd.Parameters.AddWithValue("BirthDate", newStudent.BirthDate);
+            //        cmd.Parameters.AddWithValue("SectionId", newStudent.SectionId);
+            //        cmd.Parameters.AddWithValue("YearResult", newStudent.YearResult);
+            //        //ou en créant des SqlParameters
+            //        //SqlParameter Pfn = new SqlParameter
+            //        //{
+            //        //    ParameterName = "FirstName",
+            //        //    Value = newStudent.FirstName
+            //        //};
+            //        //cmd.Parameters.Add(Pfn);
+
+            //        myConnection.Open();
+            //        object o = cmd.ExecuteScalar();
+            //        myConnection.Close();
+            //        newStudent.Id = (o is DBNull) ? -1 : (int)o;
+            //        Console.WriteLine($"L'id de {newStudent.FirstName} {newStudent.LastName} est {newStudent.Id}");
+            //    }
+            //}
+
+            #endregion
+
+            #region Exe Appeler une procedure stockee
+            //Appelez la procédure pour changer de « Section » l’étudiant vous représentant
+            using (SqlConnection myConnection = new SqlConnection(MyConnectionString))
             {
-                myConnection.ConnectionString = MyConnectionString;
-                using (SqlCommand cmd = myConnection.CreateCommand())
+                using(SqlCommand cmd = myConnection.CreateCommand())
                 {
-                    cmd.CommandText = "INSERT INTO Student (FirstName, LastName,BirthDate,  SectionId, YearResult) OUTPUT inserted.ID VALUES (@FirstName, @LastName, @BirthDate, @SectionId, @YearResult); ";
-                    cmd.Parameters.AddWithValue("FirstName", newStudent.FirstName);
-                    cmd.Parameters.AddWithValue("LastName", newStudent.LastName);
-                    cmd.Parameters.AddWithValue("BirthDate", newStudent.BirthDate);
-                    cmd.Parameters.AddWithValue("SectionId", newStudent.SectionId);
-                    cmd.Parameters.AddWithValue("YearResult", newStudent.YearResult);
-                    //ou en créant des SqlParameters
-                    //SqlParameter Pfn = new SqlParameter
-                    //{
-                    //    ParameterName = "FirstName",
-                    //    Value = newStudent.FirstName
-                    //};
-                    //cmd.Parameters.Add(Pfn);
+                    cmd.CommandText = "UpdateStudent";
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("Id", 26);
+                    cmd.Parameters.AddWithValue("YearResult", 14);
+                    cmd.Parameters.AddWithValue("SectionId", 1020);
 
                     myConnection.Open();
-                    object o = cmd.ExecuteScalar();
+                    cmd.ExecuteNonQuery();
                     myConnection.Close();
-                    newStudent.Id = (o is DBNull) ? -1 : (int)o;
-                    Console.WriteLine($"L'id de {newStudent.FirstName} {newStudent.LastName} est {newStudent.Id}");
+                }
+            }
+            //Appelez la procédure pour supprimer votre voisin de la base de données
+            using (SqlConnection myConnection = new SqlConnection(MyConnectionString))
+            {
+                using(SqlCommand cmd = myConnection.CreateCommand())
+                {
+                    cmd.CommandText = "DeleteStudent";
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("Id", 27);
+
+                    myConnection.Open();
+                    cmd.ExecuteNonQuery();
+                    myConnection.Close();
+                    Console.WriteLine("Voisin supprimé");
+                }
+            }
+            //Vérifiez que le champs « Active » est bien passé à 0
+            using (SqlConnection myConnection = new SqlConnection(MyConnectionString))
+            {
+                using(SqlCommand cmd = myConnection.CreateCommand())
+                {
+                    cmd.CommandText = "SELECT * FROM Student WHERE id = 27";
+                    SqlDataAdapter mySqlDataAdapter = new SqlDataAdapter();
+                    mySqlDataAdapter.SelectCommand = cmd;
+                    DataTable myDataTable = new DataTable();
+                    mySqlDataAdapter.Fill(myDataTable);
+                    Console.WriteLine($"La colonne Active de mon voisin vaut : {myDataTable.Rows[0]["Active"]}");
                 }
             }
 
             #endregion
-
-
         }
     }
 }
