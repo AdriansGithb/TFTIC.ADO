@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data;
-using System.Data.SqlClient;
+using System.Data.SqlClient; //utiliser Microsoft.Data.SqlClient dorénavant !!!
 
 namespace ConnexionDB
 {
@@ -176,7 +176,7 @@ namespace ConnexionDB
                     cmd.Parameters.AddWithValue("SectionId", 1020);
 
                     myConnection.Open();
-                    cmd.ExecuteNonQuery();
+                    Console.WriteLine(cmd.ExecuteNonQuery());
                     myConnection.Close();
                 }
             }
@@ -200,12 +200,20 @@ namespace ConnexionDB
             {
                 using(SqlCommand cmd = myConnection.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT * FROM Student WHERE id = 27";
-                    SqlDataAdapter mySqlDataAdapter = new SqlDataAdapter();
-                    mySqlDataAdapter.SelectCommand = cmd;
-                    DataTable myDataTable = new DataTable();
-                    mySqlDataAdapter.Fill(myDataTable);
-                    Console.WriteLine($"La colonne Active de mon voisin vaut : {myDataTable.Rows[0]["Active"]}");
+                    //cmd.CommandText = "SELECT * FROM Student WHERE id = 27";
+                    //SqlDataAdapter mySqlDataAdapter = new SqlDataAdapter();
+                    //mySqlDataAdapter.SelectCommand = cmd;
+                    //DataTable myDataTable = new DataTable();
+                    //mySqlDataAdapter.Fill(myDataTable);
+                    //Console.WriteLine($"La colonne Active de mon voisin vaut : {myDataTable.Rows[0]["Active"]}");
+
+                    // ou mieux :
+                    cmd.CommandText = "SELECT Active FROM Student WHERE id = 27";
+                    myConnection.Open();
+                    bool result = (bool)cmd.ExecuteScalar();
+                    myConnection.Close();
+                    Console.WriteLine($"La colonne Active de mon voisin vaut : {result}");
+
                 }
             }
 
